@@ -12,10 +12,8 @@ import {
   Document
 } from './styled'
 import hljs from 'highlight.js'
-import {rando} from './utils'
+import {rando, getRandomPoem} from './utils'
 
-console.log(rando)
-console.log(rando.randomInt(1, 10))
 
 class App extends Component {
 
@@ -40,7 +38,7 @@ class App extends Component {
     })
   }
 
-  rules = () => {
+  get rules() {
     let {rules} = this.state
     let array = []
     let fields = ['name', 'begin', 'end']
@@ -149,22 +147,40 @@ class App extends Component {
 
     let newStyles = "".concat(styles).replace(",", "")
 
+    while(newStyles.includes('random')) {
+      newStyles = newStyles.replace('random', rando.color())
+    }
+
     return newStyles
+  }
+
+  getRandomText = async() => {
+    try{
+      let poem = await getRandomPoem()
+      this.handleChange({
+        target: {
+          name: 'editor',
+          value: poem
+        }
+      })
+    } catch (error) {
+      console.log("getRandomPoem error", error)
+    }
   }
 
   render() {
     let {editor} = this.state
-    let {handleChange, newFields, rules, convertToMarkup} = this
+    let {handleChange, newFields, rules, convertToMarkup, getRandomText} = this
     return (
       <Container>
         <Column>
-          {rules()}
+          {rules}
           <Button onClick={this.newFields}>
             New Rule
           </Button>
         </Column>
         <Column>
-          <Button>
+          <Button onClick={getRandomText}>
             Random Text
           </Button>
           <Document>

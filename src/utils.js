@@ -1,5 +1,3 @@
-const shakespeareApi = "https://api.graph.cool/simple/v1/shakespeare"
-
 class Random {
   constructor(max = 1000, allowNegatives = true) {
     this.max = max
@@ -20,7 +18,43 @@ class Random {
   }
 }
 
-export const rando = new Random()
+class ColorGenerator extends Random {
+  constructor(max, allowNegatives, type='rgb') {
+    super(max, allowNegatives)
+    if(this.typeList.includes(type)) {
+      this.type = type
+    } else {
+      this.type = 'rgb'
+    }
+  }
+  typeList = ['hex', 'rgb']
+
+  get types() {
+    return this.typeList
+  }
+
+  set types(types) {
+    if (Array.isArray(types)) {
+      this.typeList = types.map(type => type)
+    }
+  }
+
+  color() {
+    let r = super.randomInt(0,255)
+    let g = super.randomInt(0,255)
+    let b = super.randomInt(0,255)
+    if (this.type === 'hex') {
+      return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`
+    } else {
+      return `rgb(${r}, ${g}, ${b})`
+    }
+  }
+}
+
+const shakespeareApi = "https://api.graph.cool/simple/v1/shakespeare"
+
+
+export const rando = new ColorGenerator()
 
 let options = () => {
   return {
@@ -41,5 +75,17 @@ let options = () => {
         }
       }`
     })
+  }
+}
+
+export async function getRandomPoem() {
+  try {
+    let result = await fetch(shakespeareApi, options());
+    let response = await result.json();
+    let poem = response.data.allPoems[0]
+    return poem.text
+  } catch(error) {
+    console.log("Error in getRandomPoem", error)
+    throw error
   }
 }
